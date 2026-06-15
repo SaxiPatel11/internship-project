@@ -73,7 +73,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 import os
-
+import allure
+from allure_commons.types import AttachmentType
 
 def browser_init(context):
     browser = os.getenv("BROWSER", "chrome")
@@ -142,10 +143,22 @@ def before_step(context, step):
     print("\nStarted step:", step.name)
 
 
+# def after_step(context, step):
+#     if step.status == "failed":
+#         print("\nStep failed:", step.name)
+
 def after_step(context, step):
     if step.status == "failed":
         print("\nStep failed:", step.name)
 
+        # take screenshot
+        screenshot = context.driver.get_screenshot_as_png()
+
+        allure.attach(
+            screenshot,
+            name="Failed Step Screenshot",
+            attachment_type=AttachmentType.PNG
+        )
 
 def after_scenario(context, scenario):
     print("\nFinished scenario:", scenario.name)
