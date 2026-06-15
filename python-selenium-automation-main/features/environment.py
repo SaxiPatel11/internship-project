@@ -1,19 +1,50 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+import os
+
+# def browser_init(context):
+#     """
+#     :param context: Behave context
+#     """
+#     driver_path = ChromeDriverManager().install()
+#     service = Service(driver_path)
+#     context.driver = webdriver.Chrome(service=service)
+#
+#     context.driver.maximize_window()
+#     context.driver.implicitly_wait(4)
 
 
 def browser_init(context):
-    """
-    :param context: Behave context
-    """
-    driver_path = ChromeDriverManager().install()
-    service = Service(driver_path)
-    context.driver = webdriver.Chrome(service=service)
+    browser = os.getenv("BROWSER", "chrome")
 
-    context.driver.maximize_window()
+    if browser.lower() == "firefox":
+        firefox_options = FirefoxOptions()
+        firefox_options.add_argument("--headless")
+
+        service = FirefoxService(GeckoDriverManager().install())
+        context.driver = webdriver.Firefox(
+            service=service,
+            options=firefox_options
+        )
+
+    else:
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--window-size=1920,1080")
+
+        service = Service(ChromeDriverManager().install())
+        context.driver = webdriver.Chrome(
+            service=service,
+            options=chrome_options
+        )
+
     context.driver.implicitly_wait(4)
-
 
 def before_scenario(context, scenario):
     print('\nStarted scenario: ', scenario.name)
